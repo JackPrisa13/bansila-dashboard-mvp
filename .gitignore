@@ -1,0 +1,11 @@
+# Ignore raw data and database dumps
+data-warehouse-init/*.sql
+raw-data/
+*.csv
+*.json
+
+# Ignore environment variables
+.env
+
+# Ignore Jupyter checkpoint files
+.ipynb_checkpoints/
