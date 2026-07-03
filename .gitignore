@@ -9,3 +9,10 @@ raw-data/
 
 # Ignore Jupyter checkpoint files
 .ipynb_checkpoints/
+
+# OS files
+.DS_Store
+
+# Python virtual environment
+.venv/
+__pycache__/
