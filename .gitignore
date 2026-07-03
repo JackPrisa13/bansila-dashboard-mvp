@@ -1,18 +1,23 @@
-# Ignore raw data and database dumps
+# ==========================================
+# Bansi.la MVP - Git Ignore Architecture
+# ==========================================
+
+# 1. Raw Data & Database State (Strictly Excluded)
 data-warehouse-init/*.sql
+!data-warehouse-init/02_post_deploy_transformations.sql
 raw-data/
 *.csv
 *.json
 
-# Ignore environment variables
+# 2. Security & Credentials
 .env
 
-# Ignore Jupyter checkpoint files
-.ipynb_checkpoints/
-
-# OS files
-.DS_Store
-
-# Python virtual environment
+# 3. Python Ecosystem & Caches
 .venv/
 __pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# 4. OS-Level Artifacts
+.DS_Store
+Thumbs.db
