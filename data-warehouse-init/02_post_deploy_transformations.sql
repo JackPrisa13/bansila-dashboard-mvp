@@ -3,12 +3,24 @@
 -- Execution Layer: Materialized Views and Aggregate Tables
 -- ==============================================================================
 -- 0. Create Index
-DROP INDEX IF EXISTS idx_company_user_date ON bansila_analytics.g4o_audits;
-CREATE INDEX idx_company_user_date ON bansila_analytics.g4o_audits(company_id, user_id, created_at);
+SET @idx_exists := (SELECT COUNT(1) FROM information_schema.statistics 
+  WHERE table_schema = 'bansila_analytics' AND table_name = 'g4o_audits' AND index_name = 'idx_company_user_date');
+SET @sql := IF(@idx_exists = 0, 
+  'CREATE INDEX idx_company_user_date ON bansila_analytics.g4o_audits(company_id, user_id, created_at)', 
+  'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- The Ultimate Behavioral Covering Index
-DROP INDEX IF EXISTS idx_behavioral_funnel ON bansila_analytics.g4o_audits;
-CREATE INDEX idx_behavioral_funnel ON bansila_analytics.g4o_audits (created_at, company_id, user_id, auditable_type);
+SET @idx_exists := (SELECT COUNT(1) FROM information_schema.statistics 
+  WHERE table_schema = 'bansila_analytics' AND table_name = 'g4o_audits' AND index_name = 'idx_behavioral_funnel');
+SET @sql := IF(@idx_exists = 0, 
+  'CREATE INDEX idx_behavioral_funnel ON bansila_analytics.g4o_audits (created_at, company_id, user_id, auditable_type)', 
+  'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 -- ------------------------------------------------------------------------------
 -- 1. Create Aggregate Table: summary_daily_active
 -- ------------------------------------------------------------------------------
@@ -60,6 +72,7 @@ SELECT
     days_to_expiry,
     sticker_price AS revenue_at_risk,
     -- The Bucketing Logic
+    CONVERT(
     (CASE 
         WHEN days_to_expiry BETWEEN -30 AND -22 THEN '1. Expired 3-4 Weeks Ago'
         WHEN days_to_expiry BETWEEN -21 AND -15 THEN '2. Expired 2-3 Weeks Ago'
@@ -70,7 +83,9 @@ SELECT
         WHEN days_to_expiry BETWEEN 15 AND 21   THEN '7. Expires in 2-3 Weeks'
         WHEN days_to_expiry BETWEEN 22 AND 30   THEN '8. Expires in 3-4 Weeks'
         ELSE '9. Outside Window'
-    END) COLLATE utf8mb4_unicode_ci AS renewal_cohort
+    END)
+    USING utf8mb4
+) COLLATE utf8mb4_unicode_ci AS renewal_cohort
 FROM LatestSubscriptions
 WHERE rn = 1 
   -- We only care about the +/- 30 day window for this specific dashboard
