@@ -3,8 +3,11 @@
 -- Execution Layer: Materialized Views and Aggregate Tables
 -- ==============================================================================
 -- 0. Create Index
+DROP INDEX IF EXISTS idx_company_user_date ON bansila_analytics.g4o_audits;
 CREATE INDEX idx_company_user_date ON bansila_analytics.g4o_audits(company_id, user_id, created_at);
+
 -- The Ultimate Behavioral Covering Index
+DROP INDEX IF EXISTS idx_behavioral_funnel ON bansila_analytics.g4o_audits;
 CREATE INDEX idx_behavioral_funnel ON bansila_analytics.g4o_audits (created_at, company_id, user_id, auditable_type);
 -- ------------------------------------------------------------------------------
 -- 1. Create Aggregate Table: summary_daily_active
